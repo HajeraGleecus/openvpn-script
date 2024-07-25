@@ -15,8 +15,8 @@ check_exit_status() {
 }
 
 # Install epel-release
-yum install epel-release --enablerepo=base,updates -y
-check_exit_status "Failed to install epel-release"
+#yum install epel-release --enablerepo=base,updates -y
+#check_exit_status "Failed to install epel-release"
 
 # Install openvpn and easy-rsa
 yum install openvpn easy-rsa --enablerepo=epel -y
