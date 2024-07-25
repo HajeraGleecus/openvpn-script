@@ -116,7 +116,7 @@ Go to GitHub and create a new public repository (e.g., openvpn-setup).
 Clone the repository to your local machine.
 bash
 Copy code
-git clone https://github.com/your-username/openvpn-setup.git
+git clone https://github.com/your-username/openvpn-script.git
 cd openvpn-setup
 Add the script to the repository:
 
@@ -137,10 +137,10 @@ Fetch the script using wget or curl:
 bash
 Copy code
 # Using wget
-wget https://raw.githubusercontent.com/your-username/openvpn-setup/main/setup-openvpn.sh
+wget https://raw.githubusercontent.com/your-username/openvpn-script/main/setup-openvpn.sh
 
 # Using curl
-curl -O https://raw.githubusercontent.com/your-username/openvpn-setup/main/setup-openvpn.sh
+curl -O https://raw.githubusercontent.com/your-username/openvpn-script/main/setup-openvpn.sh
 Make the script executable:
 
 bash
@@ -155,10 +155,10 @@ Summary of Commands
 bash
 Copy code
 # Fetch the script using wget
-wget https://raw.githubusercontent.com/HajeraGleecus/openvpn-setup/main/setup-openvpn.sh
+wget https://raw.githubusercontent.com/HajeraGleecus/openvpn-script/main/setup-openvpn.sh
 
 # Or using curl
-curl -O https://raw.githubusercontent.com/HajeraGleecus/openvpn-setup/main/setup-openvpn.sh
+curl -O https://raw.githubusercontent.com/HajeraGleecus/openvpn-script/main/setup-openvpn.sh
 
 # Make the script executable
 chmod +x setup-openvpn.sh
