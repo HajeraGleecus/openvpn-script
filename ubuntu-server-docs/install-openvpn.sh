@@ -123,7 +123,7 @@ cat << EOF > "$CLIENT_CONFIG_DIR/client1.ovpn"
 client
 dev tun
 proto udp
-remote $(curl https://ipinfo.io/ip) 1194
+remote $(hostname -I | awk '{print $1}') 1194
 resolv-retry infinite
 nobind
 persist-key
@@ -157,7 +157,7 @@ cat << EOF > "$CLIENT_CONFIG_DIR/client2.ovpn"
 client
 dev tun
 proto udp
-remote $(curl https://ipinfo.io/ip) 1194
+remote $(hostname -I | awk '{print $1}') 1194
 resolv-retry infinite
 nobind
 persist-key
