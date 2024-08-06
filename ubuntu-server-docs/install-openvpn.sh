@@ -6,21 +6,22 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-# Update and upgrade the system
+echo "Updating and upgrading the system..."
 apt update && apt upgrade -y
 
-# Install OpenVPN and Easy-RSA
+echo "Installing OpenVPN and Easy-RSA..."
 apt install openvpn easy-rsa -y
 
-# Install and configure SSH
+echo "Installing and configuring SSH..."
 apt install openssh-server -y
 ufw allow OpenSSH
 
-# Set up Easy-RSA CA
-make-cadir ~/openvpn-ca
-cd ~/openvpn-ca
+echo "Setting up Easy-RSA CA directory..."
+EASYRSA_DIR=~/easy-rsa
+make-cadir "$EASYRSA_DIR"
+cd "$EASYRSA_DIR" || exit
 
-# Configure vars
+echo "Configuring Easy-RSA variables..."
 cat << EOF > vars
 set_var EASYRSA_REQ_COUNTRY    "US"
 set_var EASYRSA_REQ_PROVINCE   "CA"
@@ -32,34 +33,54 @@ set_var EASYRSA_ALGO           "rsa"
 set_var EASYRSA_KEY_SIZE       2048
 EOF
 
-# Build the CA
+echo "Sourcing Easy-RSA variables..."
+# Source vars file
 source vars
-./clean-all
-./build-ca --batch
 
-# Generate server certificate and key
-./build-key-server --batch server
+echo "Cleaning any existing keys and certificates..."
+# Initialize the PKI and clean any existing keys and certificates
+./easyrsa init-pki
 
+echo "Building the Certificate Authority (CA)..."
+# Build the CA
+./easyrsa build-ca nopass
+
+echo "Generating server certificate and key..."
+# Generate the server certificate and key
+./easyrsa gen-req server nopass
+./easyrsa sign-req server server
+
+echo "Generating Diffie-Hellman parameters..."
 # Generate Diffie-Hellman parameters
-./build-dh
+./easyrsa gen-dh
 
-# Generate a TLS key
-openvpn --genkey --secret keys/ta.key
+echo "Generating TLS-Auth key..."
+# Generate a TLS-Auth key
+openvpn --genkey secret pki/ta.key
 
+echo "Generating client certificates and keys..."
 # Generate client certificates and keys
-./build-key --batch client1
-./build-key --batch client2
+./easyrsa gen-req client1 nopass
+./easyrsa sign-req client client1
 
+./easyrsa gen-req client2 nopass
+./easyrsa sign-req client client2
+
+echo "Copying certificates and keys to the OpenVPN directory..."
+# Copy certificates and keys to the OpenVPN directory
+cp pki/ca.crt pki/issued/server.crt pki/private/server.key pki/ta.key pki/dh.pem /etc/openvpn/
+
+echo "Configuring the OpenVPN server..."
 # Configure OpenVPN server
 cat << EOF > /etc/openvpn/server.conf
 port 1194
 proto udp
 dev tun
-ca /etc/openvpn/ca.crt
-cert /etc/openvpn/server.crt
-key /etc/openvpn/server.key
-dh /etc/openvpn/dh2048.pem
-tls-auth /etc/openvpn/ta.key 0
+ca ca.crt
+cert server.crt
+key server.key
+dh dh.pem
+tls-auth ta.key 0
 cipher AES-256-CBC
 auth SHA256
 user nobody
@@ -78,22 +99,21 @@ status openvpn-status.log
 verb 3
 EOF
 
-# Copy certificates and keys to OpenVPN directory
-cp ~/openvpn-ca/keys/{server.crt,server.key,ca.crt,ta.key,dh2048.pem} /etc/openvpn/
-
+echo "Enabling IP forwarding..."
 # Enable IP forwarding
 sed -i '/^#net.ipv4.ip_forward=1/c\net.ipv4.ip_forward=1' /etc/sysctl.conf
 sysctl -p
 
+echo "Configuring UFW for OpenVPN..."
 # Configure UFW for OpenVPN
 ufw allow 1194/udp
 ufw enable
 
+echo "Starting and enabling the OpenVPN service..."
 # Start and enable OpenVPN service
 systemctl start openvpn@server
 systemctl enable openvpn@server
 
-# Display public IP
 echo "Your public IP address is: $(curl -s ifconfig.me)"
 
 echo "OpenVPN and SSH installation and configuration completed on Ubuntu Server 24.04."
