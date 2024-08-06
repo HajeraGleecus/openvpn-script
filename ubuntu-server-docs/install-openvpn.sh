@@ -114,6 +114,79 @@ echo "Starting and enabling the OpenVPN service..."
 systemctl start openvpn@server
 systemctl enable openvpn@server
 
+# Generate .ovpn files for each client
+CLIENT_CONFIG_DIR=~/client-configs
+mkdir -p "$CLIENT_CONFIG_DIR"
+
+echo "Generating client1.ovpn file..."
+cat << EOF > "$CLIENT_CONFIG_DIR/client1.ovpn"
+client
+dev tun
+proto udp
+remote $(curl -s ifconfig.me) 1194
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+remote-cert-tls server
+cipher AES-256-CBC
+auth SHA256
+comp-lzo
+verb 3
+key-direction 1
+
+<ca>
+$(cat "$EASYRSA_DIR/pki/ca.crt")
+</ca>
+
+<cert>
+$(cat "$EASYRSA_DIR/pki/issued/client1.crt")
+</cert>
+
+<key>
+$(cat "$EASYRSA_DIR/pki/private/client1.key")
+</key>
+
+<tls-auth>
+$(cat "$EASYRSA_DIR/pki/ta.key")
+</tls-auth>
+EOF
+
+echo "Generating client2.ovpn file..."
+cat << EOF > "$CLIENT_CONFIG_DIR/client2.ovpn"
+client
+dev tun
+proto udp
+remote $(curl -s ifconfig.me) 1194
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+remote-cert-tls server
+cipher AES-256-CBC
+auth SHA256
+comp-lzo
+verb 3
+key-direction 1
+
+<ca>
+$(cat "$EASYRSA_DIR/pki/ca.crt")
+</ca>
+
+<cert>
+$(cat "$EASYRSA_DIR/pki/issued/client2.crt")
+</cert>
+
+<key>
+$(cat "$EASYRSA_DIR/pki/private/client2.key")
+</key>
+
+<tls-auth>
+$(cat "$EASYRSA_DIR/pki/ta.key")
+</tls-auth>
+EOF
+
 echo "Your public IP address is: $(curl -s ifconfig.me)"
 
 echo "OpenVPN and SSH installation and configuration completed on Ubuntu Server 24.04."
+echo "Client configuration files have been created in the directory: $CLIENT_CONFIG_DIR"
