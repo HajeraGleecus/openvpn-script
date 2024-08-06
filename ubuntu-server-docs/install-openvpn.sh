@@ -28,8 +28,8 @@ set_var EASYRSA_REQ_CITY       "San Francisco"
 set_var EASYRSA_REQ_ORG        "Gleecus"
 set_var EASYRSA_REQ_EMAIL      "sunny@gleecus.com"
 set_var EASYRSA_REQ_OU         "Development"
-set_var EASYRSA_ALGO           "ec"
-set_var EASYRSA_CURVE          "prime256v1"
+set_var EASYRSA_ALGO           "rsa"
+set_var EASYRSA_KEY_SIZE       2048
 EOF
 
 # Build the CA
@@ -51,8 +51,6 @@ openvpn --genkey --secret keys/ta.key
 ./build-key --batch client2
 
 # Configure OpenVPN server
-gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz > /etc/openvpn/server.conf
-
 cat << EOF > /etc/openvpn/server.conf
 port 1194
 proto udp
