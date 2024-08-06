@@ -155,7 +155,7 @@ cat <<EOF > /etc/openvpn/client-configs/client1.ovpn
 client
 dev tun
 proto udp
-remote 122.171.35.82 1194
+remote YOUR_SERVER_IP 1194
 resolv-retry infinite
 nobind
 user nobody
@@ -177,7 +177,7 @@ cat <<EOF > /etc/openvpn/client-configs/client2.ovpn
 client
 dev tun
 proto udp
-remote 122.171.35.82 1194
+remote YOUR_SERVER_IP 1194
 resolv-retry infinite
 nobind
 user nobody
